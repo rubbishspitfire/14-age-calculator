@@ -2,29 +2,163 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Age Calculator</title>
-        <link rel="stylesheet" href="style.css">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"/>
-        <!--SEO Meta Tags-->
-        <meta name="author" content="Patience Condell">
-        <meta name="description" content="Creating Age Calculator">
-        <!--Open Graph Tags-->
-        <meta property="og:title" content="Accordion">
-        <meta property="og:description" content="Creating Age Calculator">
-        <meta property="og:type" content="website">
-        <!--Favicon-->
-        <link rel="icon" href="icon.png" type="image/x-icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Age Calculator</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles to ensure Inter font and responsive behavior */
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            /* Dark background color */
+            background-color: #111827;
+        }
+        /* Ensure the container is responsive */
+        .calculator-container {
+            max-width: 90%; /* Max width on smaller screens */
+            width: 500px; /* Fixed width on larger screens */
+        }
+        /* Specific styling for date input to ensure consistency in dark mode */
+        input[type="date"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-color: #374151; /* Dark gray input background */
+            border: 1px solid #4b5563; /* Darker border */
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            line-height: 1.5rem;
+            color: #f3f4f6; /* Light text color */
+            width: 100%;
+            box-sizing: border-box;
+        }
+    </style>
 </head>
-<body>
-    <div class="age-calculator">
-        <h1>Age <span>Calculator</span></h1>
-        <input type="date" name="b-date" id="birth_date">
-        <button id="calculate_btn">Calculate</button>
-        <div id="calculate_age">Your Age</div>
-    </div>
-    
+<body class="bg-gray-900 flex items-center justify-center min-h-screen p-4 sm:p-6 lg:p-8">
+    <!-- Main container for the age calculator -->
+    <div class="calculator-container bg-gray-800 p-6 sm:p-8 rounded-xl shadow-2xl flex flex-col items-center space-y-6">
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-white mb-4 text-center">Age Calculator</h1>
 
-<script type="text/javascript" src="script.js"></script>
+        <!-- Input group for birthdate -->
+        <div class="w-full">
+            <label for="birthdate" class="block text-gray-200 text-lg font-medium mb-2">Enter your Birthdate:</label>
+            <input
+                type="date"
+                id="birthdate"
+                class="block w-full px-4 py-2 border border-gray-600 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-white text-base"
+            >
+        </div>
+
+        <!-- Button to calculate age -->
+        <button
+            id="calculateBtn"
+            class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-lg focus:ring-offset-gray-800"
+        >
+            Calculate Age
+        </button>
+
+        <!-- Display area for the result -->
+        <div id="result" class="text-center text-xl sm:text-2xl font-semibold text-gray-100 mt-4 min-h-[3rem]">
+            <!-- Age will be displayed here -->
+        </div>
+    </div>
+
+    <script>
+        // JavaScript for age calculation
+        document.addEventListener('DOMContentLoaded', () => {
+            const birthdateInput = document.getElementById('birthdate');
+            const calculateBtn = document.getElementById('calculateBtn');
+            const resultDiv = document.getElementById('result');
+
+            calculateBtn.addEventListener('click', calculateAge);
+
+            // Function to reset result styling
+            function resetResultStyling() {
+                resultDiv.classList.remove('text-green-600', 'text-red-600', 'text-yellow-400');
+                // Use a light default text color for consistency in dark mode
+                resultDiv.classList.add('text-gray-100');
+            }
+
+            function calculateAge() {
+                const birthdateValue = birthdateInput.value;
+                resetResultStyling(); // Reset styling before showing new message
+
+                // Check if a date is entered
+                if (!birthdateValue) {
+                    resultDiv.textContent = "Please enter your birthdate.";
+                    resultDiv.classList.remove('text-gray-100');
+                    resultDiv.classList.add('text-yellow-400'); // Yellow for warning in dark mode
+                    return;
+                }
+
+                const birthDate = new Date(birthdateValue);
+                const today = new Date();
+
+                // Check for invalid date (e.g., date in the future)
+                if (birthDate > today) {
+                    resultDiv.textContent = "Birthdate cannot be in the future.";
+                    resultDiv.classList.remove('text-gray-100');
+                    resultDiv.classList.add('text-red-500'); // Red for error
+                    return;
+                }
+
+                let age = today.getFullYear() - birthDate.getFullYear();
+                const monthDifference = today.getMonth() - birthDate.getMonth();
+                const dayDifference = today.getDate() - birthDate.getDate();
+
+                // Adjust age if birth month/day hasn't occurred yet this year
+                if (monthDifference < 0 || (monthDifference === 0 && dayDifference < 0)) {
+                    age--;
+                }
+
+                // Display the result
+                resultDiv.classList.remove('text-gray-100'); // Remove default text color
+
+                if (age < 0) {
+                     resultDiv.textContent = "Invalid birthdate.";
+                     resultDiv.classList.add('text-red-500');
+                } else if (age === 0 && (monthDifference > 0 || (monthDifference === 0 && dayDifference >= 0))) {
+                    // Less than a year old, show months and days
+                    let months = today.getMonth() - birthDate.getMonth();
+                    let days = today.getDate() - birthDate.getDate();
+
+                    // Handle negative days difference (e.g., today 5th, birthdate 10th)
+                    if (days < 0) {
+                        months--;
+                        // Get days in previous month
+                        const prevMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+                        days = prevMonth.getDate() + days;
+                    }
+
+                    // Handle negative months difference (e.g., today Jan, birthdate Feb)
+                    if (months < 0) {
+                        months = 12 + months;
+                    }
+
+                    resultDiv.classList.add('text-green-400'); // Green for success
+
+                    if (months === 0 && days === 0) {
+                        resultDiv.textContent = "🎉 Happy Birthday! You were born today!";
+                    } else if (months === 0) {
+                         resultDiv.textContent = `You are ${days} day(s) old!`;
+                    } else if (days === 0) {
+                         resultDiv.textContent = `You are ${months} month(s) old!`;
+                    } else {
+                        resultDiv.textContent = `You are ${months} month(s) and ${days} day(s) old!`;
+                    }
+
+                } else {
+                    resultDiv.textContent = `You are ${age} years old!`;
+                    resultDiv.classList.add('text-green-400'); // Green for success
+                }
+            }
+        });
+    </script>
 </body>
 </html>
